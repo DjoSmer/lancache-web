@@ -1,5 +1,8 @@
-
 export type CacheData =  {
     size: number;
-    createdAt: Date | null
+    createdAt: Date
+}
+
+export type CacheDataList = {
+    [key: string]: CacheData
 }

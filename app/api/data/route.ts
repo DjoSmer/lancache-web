@@ -1,16 +1,30 @@
 import {NextRequest} from 'next/server'
-import type {CacheData} from '@/types'
+import {CacheDataList, CacheData} from '@/types'
 
-const getInfo = (db: Object) => {
+interface DB {
+    [key: string]: DB | string
+}
+
+interface FileData {
+    'content-length': string;
+    date: string;
+}
+
+interface FileList {
+    [key: string]: FileData
+}
+
+const getInfo = (db: DB) => {
 
     if (db["0"]) {
+        const files = db as unknown as FileList;
         const fileData: CacheData = {
             size: 0,
-            createdAt: null
+            createdAt: new Date('01/01/1970')
         };
-        Object.keys(db).forEach((key) => {
-            fileData.size += Math.round(parseInt(db[key]['content-length']) / 1024 / 1024);
-            const createdAt = new Date(db[key]['date']);
+        Object.keys(files).forEach((key) => {
+            fileData.size += parseInt(files[key]['content-length']);
+            const createdAt = new Date(files[key]['date']);
             if (fileData.createdAt < createdAt) {
                 fileData.createdAt = createdAt;
             }
@@ -21,10 +35,10 @@ const getInfo = (db: Object) => {
 
     const dirData: CacheData = {
         size: 0,
-        createdAt: null
+        createdAt: new Date('01/01/1970')
     }
     Object.keys(db).forEach((key) => {
-        const data = getInfo(db[key]);
+        const data = getInfo(<DB>db[key]);
         dirData.size += data.size;
         const createdAt = data.createdAt;
         if (dirData.createdAt < createdAt) {
@@ -35,9 +49,9 @@ const getInfo = (db: Object) => {
     return dirData;
 }
 
-const getPath = (paths: string[], db: Object) => {
+const getPath = (paths: string[], db: DB) => {
     return paths.reduce((db, path) => {
-        return db[path];
+        return <DB>db[path];
     }, db);
 }
 
@@ -52,7 +66,7 @@ export async function POST(req: NextRequest) {
     const data = Object.keys(db).reduce((data, key) => {
         data[key] = getInfo(db[key]);
         return data;
-    }, {});
+    }, {} as CacheDataList);
 
     return Response.json({data})
 }
