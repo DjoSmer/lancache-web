@@ -1,4 +1,5 @@
 export type CacheData =  {
+    filepath?: string;
     size: number;
     createdAt: Date
 }

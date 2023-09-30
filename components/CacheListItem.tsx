@@ -1,7 +1,7 @@
 'use client'
 
-import {useState, FC} from 'react';
-import {Divider, ListItemButton, ListItemText, Collapse} from "@mui/material";
+import {FC, useState} from 'react';
+import {Collapse, Divider, ListItem, ListItemButton, ListItemText} from "@mui/material";
 import {CacheData} from "@/types";
 import {CacheListItemInfo} from "./CacheListItemInfo";
 import {CacheList} from "./CacheList";
@@ -20,14 +20,27 @@ export const CacheListItem: FC<CacheListItemProps> = ({paths, name, cacheData}) 
         setOpen(!open);
     };
 
-    return <>
-        <ListItemButton onClick={handleClick}>
-            <ListItemText primary={name} secondary={<CacheListItemInfo cacheData={cacheData}/>} />
-            {open ? '-' : '+'}
-        </ListItemButton>
-        <Divider component="li" />
-        <Collapse in={open} timeout="auto" unmountOnExit>
-            <CacheList paths={paths.concat(name)}/>
-        </Collapse>
-    </>
+    const itemText = <ListItemText primary={cacheData.filepath || name}
+                                   secondary={<CacheListItemInfo cacheData={cacheData}/>}/>;
+
+    return cacheData.filepath ?
+        <>
+            <ListItem onClick={handleClick}>
+                {itemText}
+            </ListItem>
+            <Divider component="li"/>
+        </>
+        :
+        <>
+            <ListItemButton onClick={handleClick}>
+                {itemText}
+                {open ? '-' : '+'}
+            </ListItemButton>
+            <Divider component="li"/>
+            <Collapse in={open} timeout="auto" unmountOnExit>
+                <CacheList paths={paths.concat(name)}/>
+            </Collapse>
+        </>
+
+
 }

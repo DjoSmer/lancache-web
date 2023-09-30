@@ -6,6 +6,7 @@ interface DB {
 }
 
 interface FileData {
+    filepath: string;
     'content-length': string;
     date: string;
 }
@@ -16,19 +17,13 @@ interface FileList {
 
 const getInfo = (db: DB) => {
 
-    if (db["0"]) {
-        const files = db as unknown as FileList;
+    if (db['key']) {
+        const file = db as unknown as FileData;
         const fileData: CacheData = {
-            size: 0,
-            createdAt: new Date('01/01/1970')
+            filepath: file.filepath,
+            size: parseInt(file['content-length']),
+            createdAt: new Date(file.date)
         };
-        Object.keys(files).forEach((key) => {
-            fileData.size += parseInt(files[key]['content-length']);
-            const createdAt = new Date(files[key]['date']);
-            if (fileData.createdAt < createdAt) {
-                fileData.createdAt = createdAt;
-            }
-        });
 
         return fileData;
     }
